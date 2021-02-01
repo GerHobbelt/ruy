@@ -356,6 +356,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":blocking_counter",
+        ":cpu",
         ":check_macros",
         ":denormal",
         ":time",
@@ -367,6 +368,13 @@ cc_library(
 cc_library(
     name = "cpu_cache_params",
     hdrs = ["cpu_cache_params.h"],
+    copts = ruy_copts(),
+)
+
+cc_library(
+    name = "cpu",
+    srcs = ["cpu.cc"],
+    hdrs = ["cpu.h"],
     copts = ruy_copts(),
 )
 

@@ -24,6 +24,7 @@ limitations under the License.
 #include <mutex>   // NOLINT(build/c++11)
 #include <thread>  // NOLINT(build/c++11)
 
+#include "ruy/cpu.h"
 #include "ruy/check_macros.h"
 #include "ruy/denormal.h"
 #include "ruy/trace.h"
@@ -38,6 +39,7 @@ class Thread {
       : state_(State::Startup),
         count_busy_threads_(count_busy_threads),
         spin_duration_(spin_duration) {
+    GetCPUThreadAffinity(cpu_mask_);
     thread_.reset(new std::thread(ThreadFunc, this));
   }
 
@@ -122,7 +124,10 @@ class Thread {
     state_cond_mutex_.unlock();
   }
 
-  static void ThreadFunc(Thread* arg) { arg->ThreadFuncImpl(); }
+  static void ThreadFunc(Thread* arg) {
+    SetCPUThreadAffinity(arg->cpu_mask_);
+    arg->ThreadFuncImpl();
+  }
 
   // Waits for state_ to be different from State::Ready, and returns that
   // new value.
@@ -209,6 +214,7 @@ class Thread {
 
   // See ThreadPool::spin_duration_.
   const Duration spin_duration_;
+  CpuSet cpu_mask_;
 };
 
 void ThreadPool::ExecuteImpl(int task_count, int stride, Task* tasks) {
