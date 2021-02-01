@@ -24,6 +24,7 @@ limitations under the License.
 #include <mutex>               // NOLINT(build/c++11)
 #include <thread>              // NOLINT(build/c++11)
 
+#include "ruy/cpu.h"
 #include "ruy/check_macros.h"
 #include "ruy/wait.h"
 
@@ -45,6 +46,7 @@ class Thread {
         state_(State::Startup),
         counter_to_decrement_when_ready_(counter_to_decrement_when_ready),
         spin_duration_(spin_duration) {
+    GetCPUThreadAffinity(cpu_mask_);
     thread_.reset(new std::thread(ThreadFunc, this));
   }
 
@@ -101,7 +103,10 @@ class Thread {
     }
   }
 
-  static void ThreadFunc(Thread* arg) { arg->ThreadFuncImpl(); }
+  static void ThreadFunc(Thread* arg) {
+    SetCPUThreadAffinity(arg->cpu_mask_);
+    arg->ThreadFuncImpl();
+  }
 
   // Called by the master thead to give this thread work to do.
   void StartWork(Task* task) { ChangeState(State::HasWork, task); }
@@ -156,6 +161,7 @@ class Thread {
 
   // See ThreadPool::spin_duration_.
   const Duration spin_duration_;
+  CpuSet cpu_mask_;
 };
 
 void ThreadPool::ExecuteImpl(int task_count, int stride, Task* tasks) {
