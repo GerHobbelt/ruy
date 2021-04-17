@@ -41,12 +41,14 @@ class Thread {
   };
 
   explicit Thread(BlockingCounter* counter_to_decrement_when_ready,
-                  Duration spin_duration)
+                  Duration spin_duration,
+                  cpu_set_t cpu_mask)
       : task_(nullptr),
         state_(State::Startup),
         counter_to_decrement_when_ready_(counter_to_decrement_when_ready),
-        spin_duration_(spin_duration) {
-    GetCPUThreadAffinity(cpu_mask_);
+        spin_duration_(spin_duration),
+        cpu_mask_(cpu_mask),
+        need_cpu_mask_update_(CPU_COUNT(&cpu_mask) != GetCPUCount()) {
     thread_.reset(new std::thread(ThreadFunc, this));
   }
 
@@ -104,12 +106,17 @@ class Thread {
   }
 
   static void ThreadFunc(Thread* arg) {
-    SetCPUThreadAffinity(arg->cpu_mask_);
     arg->ThreadFuncImpl();
   }
 
   // Called by the master thead to give this thread work to do.
   void StartWork(Task* task) { ChangeState(State::HasWork, task); }
+
+  void SetCpuMask(cpu_set_t cpu_mask) {
+    std::lock_guard<std::mutex> cpu_lock(cpu_mask_mtx_);
+    cpu_mask_ = cpu_mask;
+    need_cpu_mask_update_ = true;
+  }
 
  private:
   // Thread entry point.
@@ -118,6 +125,13 @@ class Thread {
 
     // Thread main loop
     while (true) {
+      {
+        std::lock_guard<std::mutex> cpu_lock(cpu_mask_mtx_);
+        if (need_cpu_mask_update_) {
+          need_cpu_mask_update_ = false;
+          RUY_DCHECK(sched_setaffinity(0, sizeof(cpu_set_t), &cpu_mask_) == 0);
+        }
+      }
       // In the 'Ready' state, we have nothing to do but to wait until
       // we switch to another state.
       const auto& condition = [this]() {
@@ -161,8 +175,19 @@ class Thread {
 
   // See ThreadPool::spin_duration_.
   const Duration spin_duration_;
-  CpuSet cpu_mask_;
+
+  // Affinity of the thread.
+  std::mutex cpu_mask_mtx_;
+  cpu_set_t cpu_mask_;
+  bool need_cpu_mask_update_;
 };
+
+void ThreadPool::set_mask(cpu_set_t cpu_mask) {
+  cpu_mask_ = cpu_mask;
+  for (int i = 0; i < threads_.size(); i++) {
+    threads_[i]->SetCpuMask(cpu_mask);
+  }
+}
 
 void ThreadPool::ExecuteImpl(int task_count, int stride, Task* tasks) {
   RUY_DCHECK_GE(task_count, 1);
@@ -200,9 +225,16 @@ void ThreadPool::CreateThreads(int threads_count) {
   counter_to_decrement_when_ready_.Reset(threads_count - threads_.size());
   while (threads_.size() < unsigned_threads_count) {
     threads_.push_back(
-        new Thread(&counter_to_decrement_when_ready_, spin_duration_));
+        new Thread(
+          &counter_to_decrement_when_ready_, spin_duration_, cpu_mask_));
   }
   counter_to_decrement_when_ready_.Wait(spin_duration_);
+}
+
+ThreadPool::ThreadPool() {
+  for (int i = 0; i < GetCPUCount(); i++) {
+    CPU_SET(i, &cpu_mask_);
+  }
 }
 
 ThreadPool::~ThreadPool() {
