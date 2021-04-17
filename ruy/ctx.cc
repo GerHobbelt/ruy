@@ -44,8 +44,8 @@ int Ctx::max_num_threads() const { return impl().max_num_threads_; }
 void Ctx::set_max_num_threads(int value) {
   mutable_impl()->max_num_threads_ = value;
 }
-void Ctx::set_cpu_mask(cpu_set_t* cpu_mask) {
-  mutable_thread_pool()->set_mask(*cpu_mask);
+void Ctx::set_cpu_mask(cpu_set_t cpu_mask) {
+  mutable_thread_pool()->set_mask(cpu_mask);
 }
 
 void Ctx::SetRuntimeEnabledPaths(Path paths) {

@@ -46,7 +46,7 @@ class Context final {
   ThreadPool* mutable_thread_pool();
   int max_num_threads() const;
   void set_max_num_threads(int value);
-  void set_cpu_mask(cpu_set_t* cpu_mask);
+  void set_cpu_mask(cpu_set_t cpu_mask);
 
   void ClearPrepackedCache();
 
