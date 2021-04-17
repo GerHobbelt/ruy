@@ -56,8 +56,8 @@ bool Ctx::performance_advisory(PerformanceAdvisory advisory) const {
   return (impl().performance_advisory_ & advisory) !=
          PerformanceAdvisory::kNone;
 }
-void Ctx::set_cpu_mask(cpu_set_t* cpu_mask) {
-  mutable_thread_pool()->set_mask(*cpu_mask);
+void Ctx::set_cpu_mask(cpu_set_t cpu_mask) {
+  mutable_thread_pool()->set_mask(cpu_mask);
 }
 
 void Ctx::SetRuntimeEnabledPaths(Path paths) {

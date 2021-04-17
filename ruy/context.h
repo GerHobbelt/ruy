@@ -71,7 +71,7 @@ class Context final {
   // (e.g. ARM big.LITTLE).
   int max_num_threads() const;
   void set_max_num_threads(int value);
-  void set_cpu_mask(cpu_set_t* cpu_mask);
+  void set_cpu_mask(cpu_set_t cpu_mask);
 
   // Returns true of the last ruy::Mul using this Context flagged the specified
   // `advisory`. This is reset by each ruy::Mul call.
