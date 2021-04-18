@@ -18,8 +18,8 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include <vector>
 #include <limits.h>
+#include <vector>
 
 #if defined __ANDROID__ || defined __linux__
 #include <sched.h> // cpu_set_t

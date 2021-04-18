@@ -25,7 +25,6 @@ limitations under the License.
 #include "ruy/blocking_counter.h"
 #include "ruy/time.h"
 
-
 namespace ruy {
 
 // A workload for a thread.
