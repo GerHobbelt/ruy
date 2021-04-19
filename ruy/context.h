@@ -19,6 +19,7 @@ limitations under the License.
 #define RUY_RUY_CONTEXT_H_
 
 #include <cstdint>
+#include <sched.h>
 
 namespace ruy {
 
@@ -45,6 +46,7 @@ class Context final {
   ThreadPool* mutable_thread_pool();
   int max_num_threads() const;
   void set_max_num_threads(int value);
+  void set_cpu_mask(cpu_set_t cpu_mask);
 
   void ClearPrepackedCache();
 
