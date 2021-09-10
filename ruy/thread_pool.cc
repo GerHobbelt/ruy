@@ -42,13 +42,13 @@ class Thread {
 
   explicit Thread(BlockingCounter* counter_to_decrement_when_ready,
                   Duration spin_duration,
-                  cpu_set_t cpu_mask)
+                  CpuSet cpu_mask)
       : task_(nullptr),
         state_(State::Startup),
         counter_to_decrement_when_ready_(counter_to_decrement_when_ready),
         spin_duration_(spin_duration),
         cpu_mask_(cpu_mask),
-        need_cpu_mask_update_(CPU_COUNT(&cpu_mask) != GetCPUCount()) {
+        need_cpu_mask_update_(cpu_mask.NumEnabled() != GetCPUCount()) {
     thread_.reset(new std::thread(ThreadFunc, this));
   }
 
@@ -112,7 +112,7 @@ class Thread {
   // Called by the master thead to give this thread work to do.
   void StartWork(Task* task) { ChangeState(State::HasWork, task); }
 
-  void SetCpuMask(cpu_set_t cpu_mask) {
+  void SetCpuMask(CpuSet cpu_mask) {
     std::lock_guard<std::mutex> cpu_lock(cpu_mask_mtx_);
     cpu_mask_ = cpu_mask;
     need_cpu_mask_update_ = true;
@@ -129,7 +129,7 @@ class Thread {
         std::lock_guard<std::mutex> cpu_lock(cpu_mask_mtx_);
         if (need_cpu_mask_update_) {
           need_cpu_mask_update_ = false;
-          RUY_DCHECK(sched_setaffinity(0, sizeof(cpu_set_t), &cpu_mask_) == 0);
+          RUY_DCHECK(cpu_mask_.SetAffinity());
         }
       }
       // In the 'Ready' state, we have nothing to do but to wait until
@@ -178,14 +178,14 @@ class Thread {
 
   // Affinity of the thread.
   std::mutex cpu_mask_mtx_;
-  cpu_set_t cpu_mask_;
+  CpuSet cpu_mask_;
   bool need_cpu_mask_update_;
 };
 
-void ThreadPool::set_mask(cpu_set_t cpu_mask) {
-  cpu_mask_ = cpu_mask;
+void ThreadPool::set_mask(const unsigned long* mask_bits) {
+  cpu_mask_ = CpuSet(mask_bits);
   for (int i = 0; i < threads_.size(); i++) {
-    threads_[i]->SetCpuMask(cpu_mask);
+    threads_[i]->SetCpuMask(cpu_mask_);
   }
 }
 
@@ -232,9 +232,6 @@ void ThreadPool::CreateThreads(int threads_count) {
 }
 
 ThreadPool::ThreadPool() {
-  for (int i = 0; i < GetCPUCount(); i++) {
-    CPU_SET(i, &cpu_mask_);
-  }
 }
 
 ThreadPool::~ThreadPool() {

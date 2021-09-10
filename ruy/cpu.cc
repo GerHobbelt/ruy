@@ -21,6 +21,56 @@
 #endif
 
 namespace ruy {
+#if defined __ANDROID__ || defined __linux__
+CpuSet::CpuSet() {
+  for (int i = 0; i < GetCPUCount(); i++) {
+    Enable(i);
+  }; 
+}
+
+CpuSet::CpuSet(const unsigned long* mask) {
+  memcpy(cpu_set_.__bits, mask, sizeof(cpu_set_.__bits));
+}
+
+void CpuSet::Enable(int cpu) { CPU_SET(cpu, &cpu_set_); }
+
+void CpuSet::Disable(int cpu) { CPU_CLR(cpu, &cpu_set_); }
+
+void CpuSet::DisableAll() { CPU_ZERO(&cpu_set_); }
+
+bool CpuSet::IsEnabled(int cpu) const { return CPU_ISSET(cpu, &cpu_set_); }
+
+int CpuSet::NumEnabled() const {
+  int NumEnabled = 0;
+  for (int i = 0; i < (int)sizeof(cpu_set_t) * 8; i++) {
+    if (IsEnabled(i)) NumEnabled++;
+  }
+
+  return NumEnabled;
+}
+
+bool CpuSet::SetAffinity() const {
+  return sched_setaffinity(0, sizeof(cpu_set_t), &cpu_set_) == 0; 
+}
+
+#else   // defined __ANDROID__ || defined __linux__
+CpuSet::CpuSet() {}
+
+CpuSet::CpuSet(const unsigned long* mask) {}
+
+void CpuSet::Enable(int /* cpu */) {}
+
+void CpuSet::Disable(int /* cpu */) {}
+
+void CpuSet::DisableAll() {}
+
+bool CpuSet::IsEnabled(int /* cpu */) const { return true; }
+
+int CpuSet::NumEnabled() const { return GetCPUCount(); }
+
+bool CpuSet::SetAffinity() const { return true; }
+#endif  // defined __ANDROID__ || defined __linux__
+
 int GetCPUCount() {
   int count = 0;
 #ifdef __EMSCRIPTEN__
