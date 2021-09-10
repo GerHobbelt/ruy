@@ -26,6 +26,23 @@
 #endif
 
 namespace ruy {
+class CpuSet {
+public:
+    CpuSet();
+    CpuSet(const unsigned long* mask);
+    void Enable(int cpu);
+    void Disable(int cpu);
+    void DisableAll();
+    bool IsEnabled(int cpu) const;
+    int NumEnabled() const;
+    bool SetAffinity() const;
+#if defined __ANDROID__ || defined __linux__
+    const cpu_set_t& GetCpuSet() const { return cpu_set_; }
+   private:
+    cpu_set_t cpu_set_;
+#endif
+};
+
 // cpu info
 int GetCPUCount();
 } // namespace ruy

@@ -20,7 +20,6 @@ limitations under the License.
 #define RUY_RUY_CTX_H_
 
 #include <cstdint>
-#include <sched.h>
 
 namespace ruy {
 
@@ -54,7 +53,7 @@ class Ctx /* not final, subclassed by CtxImpl */ {
   void clear_performance_advisories();
   void set_performance_advisory(PerformanceAdvisory advisory);
   bool performance_advisory(PerformanceAdvisory advisory) const;
-  void set_cpu_mask(cpu_set_t cpu_mask);
+  void set_cpu_mask(const unsigned long* mask_bits);
 
   // Returns the set of Path's that are available. By default, this is based on
   // runtime detection of CPU features, as well as on which code paths were

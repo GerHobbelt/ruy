@@ -20,9 +20,9 @@ limitations under the License.
 #define RUY_RUY_THREAD_POOL_H_
 
 #include <vector>
-#include <sched.h> 
 
 #include "ruy/blocking_counter.h"
+#include "ruy/cpu.h"
 #include "ruy/time.h"
 
 namespace ruy {
@@ -78,7 +78,7 @@ class ThreadPool {
     ExecuteImpl(task_count, sizeof(TaskType), static_cast<Task*>(tasks));
   }
 
-  void set_mask(cpu_set_t mask);
+  void set_mask(const unsigned long* mask_bits);
   void set_spin_milliseconds(float milliseconds) {
     spin_duration_ = DurationFromMilliseconds(milliseconds);
   }
@@ -103,7 +103,7 @@ class ThreadPool {
   // The worker threads in this pool. They are owned by the pool:
   // the pool creates threads and destroys them in its destructor.
   std::vector<Thread*> threads_;
-  cpu_set_t cpu_mask_;
+  CpuSet cpu_mask_;
 
   // The BlockingCounter used to wait for the threads.
   BlockingCounter count_busy_threads_;

@@ -44,8 +44,8 @@ int Context::max_num_threads() const { return ctx().max_num_threads(); }
 void Context::set_max_num_threads(int value) {
   mutable_ctx()->set_max_num_threads(value);
 }
-void Context::set_cpu_mask(cpu_set_t cpu_mask) {
-  mutable_ctx()->set_cpu_mask(cpu_mask);
+void Context::set_cpu_mask(const unsigned long* mask_bits) {
+  mutable_ctx()->set_cpu_mask(mask_bits);
 }
 
 void Context::ClearPrepackedCache() { mutable_ctx()->ClearPrepackedCache(); }
