@@ -94,7 +94,8 @@ CpuInfo::InitStatus CpuInfo::Initialize() {
 }
 
 bool CpuInfo::NeonDotprod() {
-  return EnsureInitialized() && cpuinfo_has_arm_neon_dot();
+	return false;
+	//return EnsureInitialized() && cpuinfo_has_arm_neon_dot();
 }
 
 bool CpuInfo::Sse42() {
