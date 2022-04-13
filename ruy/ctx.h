@@ -49,7 +49,7 @@ class Ctx /* not final, subclassed by CtxImpl */ {
   int max_num_threads() const;
   void set_max_num_threads(int value);
   void set_cpu_mask(const unsigned long* mask_bits);
-  CpuInfo *mutable_cpuinfo();
+  CpuInfo* mutable_cpuinfo();
 
   // Returns the set of Path's that are available. By default, this is based on
   // runtime detection of CPU features, as well as on which code paths were
