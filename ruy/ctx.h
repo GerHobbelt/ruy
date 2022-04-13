@@ -20,7 +20,6 @@ limitations under the License.
 #define RUY_RUY_CTX_H_
 
 #include <cstdint>
-#include <sched.h>
 
 namespace ruy {
 
@@ -49,7 +48,7 @@ class Ctx /* not final, subclassed by CtxImpl */ {
   ThreadPool* mutable_thread_pool();
   int max_num_threads() const;
   void set_max_num_threads(int value);
-  void set_cpu_mask(cpu_set_t cpu_mask);
+  void set_cpu_mask(const unsigned long* mask_bits);
   CpuInfo* mutable_cpuinfo();
 
   // Returns the set of Path's that are available. By default, this is based on
