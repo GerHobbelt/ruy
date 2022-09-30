@@ -63,6 +63,12 @@ namespace ruy
       ChangeStateFromOutsideThread(State::HasWork, task);
     }
 
+    void SetCpuMask(CpuSet cpu_mask) {
+      std::lock_guard<std::mutex> cpu_lock(cpu_mask_mtx_);
+      cpu_mask_ = cpu_mask;
+      need_cpu_mask_update_ = true;
+    }
+
   private:
     enum class State
     {
@@ -150,12 +156,6 @@ namespace ruy
       RUY_TRACE_INFO(THREAD_FUNC_IMPL_WAITING);
       Wait(new_state_not_ready, spin_duration_, &state_cond_, &state_cond_mutex_);
       return new_state;
-    }
-
-    void SetCpuMask(CpuSet cpu_mask) {
-      std::lock_guard<std::mutex> cpu_lock(cpu_mask_mtx_);
-      cpu_mask_ = cpu_mask;
-      need_cpu_mask_update_ = true;
     }
 
     // Thread entry point.
