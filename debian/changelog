@@ -1,0 +1,6 @@
+libruy (0.0.1) unstable; urgency=medium
+
+  * Initial debian packaging
+
+ -- Sander <code@kroket.io>  Sat, 7 Jan 2023 20:33:36 +0100
+
