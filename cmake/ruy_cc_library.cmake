@@ -63,8 +63,8 @@ function(ruy_cc_library)
         ${_RULE_DEFINES}
     )
   else()
-    # Generating a static binary library.
-    add_library(${_NAME} STATIC ${_RULE_SRCS} ${_RULE_HDRS})
+    # Generating a SHARED binary library.
+    add_library(${_NAME} SHARED ${_RULE_SRCS} ${_RULE_HDRS})
     set_target_properties(${_NAME} PROPERTIES PUBLIC_HEADER "${_RULE_HDRS}")
     ruy_include_directories(${_NAME} "${_RULE_DEPS}")
     target_compile_options(${_NAME}

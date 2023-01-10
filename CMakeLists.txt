@@ -37,6 +37,10 @@ option(RUY_PROFILER "Enable ruy's built-in profiler (harms performance)" OFF)
 
 option(RUY_ENABLE_INSTALL "Enable install rule" ${RUY_IS_TOPLEVEL})
 
+if(${CMAKE_HOST_SYSTEM_PROCESSOR} MATCHES "arm*")
+  include(cmake/armFlags.cmake)
+endif()
+
 include(cmake/ruy_add_all_subdirs.cmake)
 include(cmake/ruy_cc_library.cmake)
 include(cmake/ruy_cc_binary.cmake)

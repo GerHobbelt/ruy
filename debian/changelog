@@ -1,3 +1,10 @@
+libruy (0.0.2) unstable; urgency=medium
+
+  * Build shared library
+  * Set ARM flags
+
+ -- Sander <code@kroket.io>  Sat, 11 Jan 2023 20:33:36 +0100
+
 libruy (0.0.1) unstable; urgency=medium
 
   * Initial debian packaging
