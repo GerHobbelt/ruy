@@ -1,3 +1,9 @@
+libruy (0.0.3) unstable; urgency=medium
+
+  * Change some ARM compilation flags
+
+ -- Sander <code@kroket.io>  Sat, 15 Jan 2023 14:33:36 +0100
+
 libruy (0.0.2) unstable; urgency=medium
 
   * Build shared library
