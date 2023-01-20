@@ -1,3 +1,9 @@
+libruy (0.0.5) unstable; urgency=medium
+
+  * Only pass -mfpu=NEON on 32bit ARM
+
+ -- Sander <code@kroket.io>  Sat, 20 Jan 2023 14:33:36 +0100
+
 libruy (0.0.4) unstable; urgency=medium
 
   * Remove ARM flag detection, assume -mfpu=neon

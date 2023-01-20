@@ -38,8 +38,18 @@ option(RUY_PROFILER "Enable ruy's built-in profiler (harms performance)" OFF)
 option(RUY_ENABLE_INSTALL "Enable install rule" ${RUY_IS_TOPLEVEL})
 
 if(${CMAKE_HOST_SYSTEM_PROCESSOR} MATCHES "arm*")
-  add_compile_options("-mfpu=neon")
-  set(NEON_FOUND true CACHE BOOL "NEON available on host")  # we'll just assume it ;)
+  if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(arm.*|ARM.*)")  # 32bit
+    add_compile_options("-mfpu=neon")  # we'll assume it
+    message(STATUS "ARM 32bit, adding -mfpu=neon")
+  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64.*|AARCH64.*)")  # NEON is implied on aarch64
+    if(NOT "${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
+      message(FATAL_ERROR "invalid pointer size")
+    endif()
+    message(STATUS "AARCH64")
+  else()
+    message(FATAL_ERROR "Unknown ARM processor '${CMAKE_SYSTEM_PROCESSOR}'")
+  endif()
+  set(NEON_FOUND true CACHE BOOL "NEON available on host")
   set(ARM_FOUND true CACHE BOOL "arm")
 endif()
 
