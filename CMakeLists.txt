@@ -38,7 +38,9 @@ option(RUY_PROFILER "Enable ruy's built-in profiler (harms performance)" OFF)
 option(RUY_ENABLE_INSTALL "Enable install rule" ${RUY_IS_TOPLEVEL})
 
 if(${CMAKE_HOST_SYSTEM_PROCESSOR} MATCHES "arm*")
-  include(cmake/armFlags.cmake)
+  add_compile_options("-mfpu=neon")
+  set(NEON_FOUND true CACHE BOOL "NEON available on host")  # we'll just assume it ;)
+  set(ARM_FOUND true CACHE BOOL "arm")
 endif()
 
 include(cmake/ruy_add_all_subdirs.cmake)
